@@ -370,9 +370,45 @@ const COL_LETTERS = ["A","B","C","D","E"];               // referensi kolom ala 
 const PALETTE = ["#10b981","#f59e0b","#6366f1","#ef4444","#14b8a6","#f472b6","#84cc16","#0ea5e9"];
 
 let labData = loadLab();          // array of object baris
+let labOriginal = [...labData];   // salinan untuk filter/sort
 let labSelected = new Set();      // id baris yg dicentang (untuk hapus)
 let chartBar = null, chartDonut = null;
 let saveTimer = null, chartTimer = null;
+
+// Undo/Redo stack (max 20 langkah)
+let undoStack = [];
+let redoStack = [];
+const MAX_HISTORY = 20;
+
+function pushUndo(){
+  if (undoStack.length >= MAX_HISTORY) undoStack.shift();
+  undoStack.push(JSON.parse(JSON.stringify(labData)));
+  redoStack = [];
+  updateUndoRedoBtn();
+}
+
+function undo(){
+  if (undoStack.length === 0) return;
+  redoStack.push(JSON.parse(JSON.stringify(labData)));
+  labData = undoStack.pop();
+  labOriginal = [...labData];
+  renderLab(); saveLabNow(false); updateUndoRedoBtn();
+  toast("↩ Undo berhasil");
+}
+
+function redo(){
+  if (redoStack.length === 0) return;
+  undoStack.push(JSON.parse(JSON.stringify(labData)));
+  labData = redoStack.pop();
+  labOriginal = [...labData];
+  renderLab(); saveLabNow(false); updateUndoRedoBtn();
+  toast("↪ Redo berhasil");
+}
+
+function updateUndoRedoBtn(){
+  document.getElementById("btnUndo").disabled = undoStack.length === 0;
+  document.getElementById("btnRedo").disabled = redoStack.length === 0;
+}
 
 function loadLab(){
   try {
@@ -503,19 +539,22 @@ function updateCharts(){
 /* ---------- CRUD ---------- */
 function nextId(){ return labData.reduce((m,r)=>Math.max(m,r.id),0)+1; }
 function addRow(){
+  pushUndo();
   labData.push({ id: nextId(), kategori:"", produk:"", harga:"", jumlah:"" });
-  renderLab(); scheduleSave();
+  renderLab(); scheduleSave(); updateUndoRedoBtn();
   const td = document.querySelector(`#labBody td.cell[data-r="${labData.length-1}"][data-c="0"]`);
-  if (td) td.focus(); // langsung fokus ke sel pertama baris baru
+  if (td) td.focus();
 }
 function deleteSelected(){
   if (!labSelected.size) { toast("Centang baris yang ingin dihapus dulu ya 🙂"); return; }
+  pushUndo();
   labData = labData.filter(r=>!labSelected.has(r.id));
   const n = labSelected.size; labSelected.clear();
-  renderLab(); scheduleSave();
-  toast(` ${n} baris dihapus.`);
+  renderLab(); scheduleSave(); updateUndoRedoBtn();
+  toast(`🗑 ${n} baris dihapus.`);
 }
 function loadSample(){
+  pushUndo();
   const S = [
     ["Makanan","Nasi Goreng Spesial",15000,3], ["Minuman","Es Teh Manis",5000,6],
     ["Makanan","Ayam Bakar",18000,2],          ["Snack","Kentang Goreng",12000,4],
@@ -523,14 +562,16 @@ function loadSample(){
     ["Makanan","Mie Ayam Bakso",14000,2],      ["Minuman","Jus Alpukat",15000,2]
   ];
   labData = S.map((r,i)=>({ id:i+1, kategori:r[0], produk:r[1], harga:String(r[2]), jumlah:String(r[3]) }));
+  labOriginal = [...labData];
   labSelected.clear();
-  renderLab(); saveLabNow(false);
+  renderLab(); saveLabNow(false); updateUndoRedoBtn();
   toast("📦 Data contoh dimuat — silakan utak-atik!");
 }
 function resetLab(){
   if (!confirm("Kosongkan SEMUA data di lab?")) return;
-  labData = []; labSelected.clear();
-  renderLab(); saveLabNow(false);
+  pushUndo();
+  labData = []; labOriginal = []; labSelected.clear();
+  renderLab(); saveLabNow(false); updateUndoRedoBtn();
   toast("♻️ Grid dikosongkan.");
 }
 function updateDeleteBtn(){
@@ -550,16 +591,20 @@ function startEdit(td, initialChar){
   td.contentEditable = "true"; td.focus();
   if (initialChar) { td.textContent = initialChar; placeCaretEnd(td); } // ketik langsung = timpa isi (seperti Excel)
 }
-function commitCell(td){
+let lastCommitState = null;
+function commitCell(td, skipUndo){
   if (!td.isContentEditable) return;
   td.contentEditable = "false";
   const r = +td.dataset.r, c = +td.dataset.c;
   const raw = td.textContent.replace(/\n/g," ").trim();
+  const oldVal = td.textContent;
   td.textContent = raw;
   const row = labData[r]; if (!row) return;
-  row[FIELDS[c]] = raw; // simpan sebagai string mentah (fidelitas edit)
-  if (c === 2 || c === 3) td.classList.toggle("cell-invalid", raw !== "" && !toNumber(raw).ok); // tandai input bukan angka
-  recomputeLab(false); scheduleSave();
+  const oldRaw = row[FIELDS[c]];
+  if (raw !== oldRaw && !skipUndo) { pushUndo(); }
+  row[FIELDS[c]] = raw;
+  if (c === 2 || c === 3) td.classList.toggle("cell-invalid", raw !== "" && !toNumber(raw).ok);
+  recomputeLab(false); scheduleSave(); updateUndoRedoBtn();
 }
 function moveFocus(r,c,allowAdd){
   c = Math.max(0, Math.min(4, c));
@@ -599,7 +644,7 @@ labBody.addEventListener("keydown", e => {
     case "F2":         e.preventDefault(); startEdit(td); break;
     case "Delete": case "Backspace": // bersihkan sel (edge case aman: hanya mode navigasi)
       e.preventDefault();
-      if (c < 4 && labData[r]) { labData[r][FIELDS[c]] = ""; td.textContent = ""; td.classList.remove("cell-invalid"); recomputeLab(false); scheduleSave(); }
+      if (c < 4 && labData[r]) { pushUndo(); labData[r][FIELDS[c]] = ""; td.textContent = ""; td.classList.remove("cell-invalid"); recomputeLab(false); scheduleSave(); updateUndoRedoBtn(); }
       break;
     default:
       if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) { e.preventDefault(); startEdit(td, e.key); }
@@ -627,13 +672,133 @@ document.getElementById("checkAll").addEventListener("change", e => {
   renderLab();
 });
 
-/* ---------- Masuk ke Data Lab ---------- */
+/* ========== EXPORT / IMPORT CSV ========== */
+function exportCSV(){
+  if (!labData.length) { toast("Data kosong, tidak ada yang bisa di-export 📭"); return; }
+  const headers = ["Kategori","Produk","Harga","Jumlah","Total"];
+  const rows = labData.map(r => [
+    r.kategori || "", r.produk || "", r.harga || "", r.jumlah || "", String(rowTotal(r))
+  ].map(v => `"${String(v).replace(/"/g,'""')}"`).join(","));
+  const csv = [headers.join(","), ...rows].join("\n");
+  const blob = new Blob(["\ufeff"+csv], { type: "text/csv;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `data-lab-${new Date().toISOString().slice(0,10)}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  toast("📥 Data berhasil di-export ke CSV!");
+}
+
+function importCSV(input){
+  const file = input.files[0];
+  if (!file) return;
+  if (!file.name.endsWith(".csv")) { toast("File harus berformat .csv 📄"); input.value=""; return; }
+  pushUndo();
+  const reader = new FileReader();
+  reader.onload = function(e){
+    const text = e.target.result;
+    const lines = text.split(/\r?\n/).filter(l=>l.trim());
+    if (lines.length < 2) { toast("CSV kosong atau hanya header 📭"); input.value=""; return; }
+    const newData = [];
+    for (let i=1; i<lines.length; i++){
+      const cols = lines[i].match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g);
+      if (!cols || cols.length < 4) continue;
+      const clean = c => c ? c.replace(/^"|"$/g, '').replace(/""/g,'"') : "";
+      newData.push({
+        id: i,
+        kategori: clean(cols[0]),
+        produk: clean(cols[1]),
+        harga: clean(cols[2]),
+        jumlah: clean(cols[3])
+      });
+    }
+    if (!newData.length) { toast("Tidak ada data valid di CSV ⚠️"); input.value=""; return; }
+    labData = newData;
+    labOriginal = [...labData];
+    labSelected.clear();
+    renderLab(); saveLabNow(false); updateUndoRedoBtn();
+    toast(`📤 ${newData.length} baris berhasil di-import!`);
+    input.value = "";
+  };
+  reader.onerror = () => { toast("Gagal membaca file ❌"); input.value=""; };
+  reader.readAsText(file);
+}
+
+/* ========== FILTER & SORT ========== */
+let currentFilter = "";
+let currentSort = "";
+
+function applyFilter(){
+  currentFilter = document.getElementById("filterInput").value.toLowerCase();
+  if (currentFilter) {
+    labData = labOriginal.filter(r => 
+      (r.kategori && r.kategori.toLowerCase().includes(currentFilter)) ||
+      (r.produk && r.produk.toLowerCase().includes(currentFilter))
+    );
+  } else {
+    labData = [...labOriginal];
+  }
+  if (currentSort) applySortInternal();
+  renderLab();
+}
+
+function applySort(){
+  currentSort = document.getElementById("sortSelect").value;
+  if (currentSort) {
+    applySortInternal();
+  } else {
+    labData = [...labOriginal];
+  }
+  if (currentFilter) {
+    labData = labData.filter(r => 
+      (r.kategori && r.kategori.toLowerCase().includes(currentFilter)) ||
+      (r.produk && r.produk.toLowerCase().includes(currentFilter))
+    );
+  }
+  renderLab();
+}
+
+function applySortInternal(){
+  const [field, dir] = currentSort.split("_");
+  const mult = dir === "desc" ? -1 : 1;
+  labData.sort((a,b) => {
+    let va, vb;
+    if (field === "kategori" || field === "produk") {
+      va = (a[field] || "").toLowerCase();
+      vb = (b[field] || "").toLowerCase();
+      if (va < vb) return -1 * mult;
+      if (va > vb) return 1 * mult;
+      return 0;
+    } else if (field === "total") {
+      va = rowTotal(a); vb = rowTotal(b);
+    } else {
+      va = toNumber(a[field]).v; vb = toNumber(b[field]).v;
+    }
+    return (va - vb) * mult;
+  });
+}
+
+function clearFilterSort(){
+  document.getElementById("filterInput").value = "";
+  document.getElementById("sortSelect").value = "";
+  currentFilter = "";
+  currentSort = "";
+  labData = [...labOriginal];
+  renderLab();
+  toast("🔄 Filter & sort di-reset");
+}
+
+/* ========== Masuk ke Data Lab ========== */
 function showLab(){
   toggleSidebar(false); renderSidebar(); setActiveNav("lab");
+  labOriginal = [...labData];
   renderLab();
   switchView("lab");
   ensureCharts(); updateCharts();
 }
 
-/* ---------- INIT ---------- */
+/* ========== INIT ========== */
 showDashboard();
