@@ -1,55 +1,68 @@
-# ==========================================
-# OS Generated Files
-# ==========================================
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
-desktop.ini
+```
+# Dependencies
+node_modules/
+venv/
+.venv/
+__pycache__/
+.mypy_cache/
+.pytest_cache/
+dist/
+build/
+target/
+.gradle/
 
-# ==========================================
-# IDE & Editor Files
-# ==========================================
+# Compiled files
+*.pyc
+*.class
+*.o
+*.exe
+*.dll
+*.so
+*.a
+*.obj
+*.out
+
+# Editor/IDE files
 .vscode/
 .idea/
 *.swp
 *.swo
-*~
-.project
-.classpath
-.settings/
+*.tmp
 
-# ==========================================
-# Node / Package Managers 
-# (Jaga-jaga jika nanti ditambahkan package.json / npm)
-# ==========================================
-node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-package-lock.json
-yarn.lock
-pnpm-lock.yaml
-
-# ==========================================
-# Build Outputs 
-# (Jika nanti di-migrate ke Vite/Webpack/React)
-# ==========================================
-dist/
-build/
-.cache/
-.next/
-out/
-
-# ==========================================
-# Environment Variables
-# ==========================================
+# System files
+.DS_Store
+Thumbs.db
 .env
 .env.local
-.env.development.local
-.env.test.local
-.env.production.local
+*.env.*
+
+# Logs and coverage
+*.log
+coverage/
+htmlcov/
+.coverage
+
+# Compressed files
+*.zip
+*.gz
+*.tar
+*.tgz
+*.bz2
+*.xz
+*.7z
+*.rar
+*.zst
+*.lz4
+*.lzh
+*.cab
+*.arj
+*.rpm
+*.deb
+*.Z
+*.lz
+*.lzo
+*.tar.gz
+*.tar.bz2
+*.tar.xz
+*.tar.zst
+```
