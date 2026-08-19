@@ -101,6 +101,46 @@
               <button onclick="resetLab()" class="w-full bg-white border-2 border-slate-200 hover:border-rose-300 hover:text-rose-500 text-slate-500 font-bold py-2.5 rounded-xl transition text-sm">♻️ Reset (Kosongkan)</button>
             </div>
 
+            <!-- Export / Import CSV -->
+            <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 space-y-2">
+              <div class="text-xs font-bold tracking-widest text-slate-400 mb-1">EXPORT / IMPORT</div>
+              <button onclick="exportCSV()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2.5 rounded-xl transition text-sm">📥 Export ke CSV</button>
+              <label class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2.5 rounded-xl transition text-sm text-center cursor-pointer block">
+                📤 Import CSV
+                <input type="file" id="csvFileInput" accept=".csv" onchange="importCSV(this)" class="hidden">
+              </label>
+            </div>
+
+            <!-- Filter & Sort -->
+            <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 space-y-2">
+              <div class="text-xs font-bold tracking-widest text-slate-400 mb-1">FILTER & SORT</div>
+              <input type="text" id="filterInput" onkeyup="applyFilter()" placeholder="🔍 Cari kategori/produk..." class="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+              <select id="sortSelect" onchange="applySort()" class="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white">
+                <option value="">Urutkan berdasarkan...</option>
+                <option value="kategori_asc">Kategori A→Z</option>
+                <option value="kategori_desc">Kategori Z→A</option>
+                <option value="produk_asc">Produk A→Z</option>
+                <option value="produk_desc">Produk Z→A</option>
+                <option value="harga_asc">Harga Terendah</option>
+                <option value="harga_desc">Harga Tertinggi</option>
+                <option value="jumlah_asc">Jumlah Terkecil</option>
+                <option value="jumlah_desc">Jumlah Terbesar</option>
+                <option value="total_asc">Total Terkecil</option>
+                <option value="total_desc">Total Tertinggi</option>
+              </select>
+              <button onclick="clearFilterSort()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold py-2.5 rounded-xl transition text-sm">🔄 Reset Filter & Sort</button>
+            </div>
+
+            <!-- Undo / Redo -->
+            <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 space-y-2">
+              <div class="text-xs font-bold tracking-widest text-slate-400 mb-1">RIWAYAT PERUBAHAN</div>
+              <div class="grid grid-cols-2 gap-2">
+                <button onclick="undo()" id="btnUndo" disabled class="bg-slate-100 hover:bg-slate-200 disabled:opacity-50 disabled:cursor-not-allowed text-slate-700 font-bold py-2.5 rounded-xl transition text-sm">↩ Undo</button>
+                <button onclick="redo()" id="btnRedo" disabled class="bg-slate-100 hover:bg-slate-200 disabled:opacity-50 disabled:cursor-not-allowed text-slate-700 font-bold py-2.5 rounded-xl transition text-sm">↪ Redo</button>
+              </div>
+              <div class="text-[10px] text-slate-400 text-center">Max 20 langkah</div>
+            </div>
+
             <!-- Statistik agregat (SUM / AVERAGE dll) -->
             <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200">
               <div class="text-xs font-bold tracking-widest text-slate-400 mb-3">📐 STATISTIK OTOMATIS</div>
