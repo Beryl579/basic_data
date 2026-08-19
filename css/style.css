@@ -1,0 +1,25 @@
+* { font-family: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif; }
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 8px; }
+.fade-up { animation: fadeUp .45s ease both; }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+.pop { animation: pop .35s cubic-bezier(.34,1.56,.64,1) both; }
+@keyframes pop { from { opacity: 0; transform: scale(.85); } to { opacity: 1; transform: scale(1); } }
+.callout { border-left: 4px solid; border-radius: .75rem; padding: 1rem 1.25rem; margin: 1rem 0; }
+.callout-example { border-color: #10b981; background: #ecfdf5; }
+.callout-note { border-color: #f59e0b; background: #fffbeb; }
+.callout-quote { border-color: #6366f1; background: #eef2ff; font-style: italic; }
+.opt-btn { transition: all .18s ease; }
+.opt-btn:not(:disabled):hover { transform: translateY(-1px); }
+
+/* ====== STYLE GRID EXCEL-LIKE (DATA LAB) ====== */
+td.cell { border: 1px solid #e2e8f0; padding: .5rem .7rem; min-width: 90px; outline: none; cursor: cell; background: #fff; }
+td.cell:focus { box-shadow: inset 0 0 0 2px #10b981; background: #ecfdf5; position: relative; z-index: 1; }
+td.cell[contenteditable="true"] { background: #fffbeb; cursor: text; }
+td.cell.num { text-align: right; font-variant-numeric: tabular-nums; }
+td.total { background: #f0fdf4 !important; font-weight: 800; color: #047857; text-align: right; font-variant-numeric: tabular-nums; }
+td.rowhead, th.colhead { background: #f1f5f9; color: #64748b; font-weight: 700; font-size: 11px; text-align: center; border: 1px solid #e2e8f0; padding: .5rem .4rem; user-select: none; }
+.cell-invalid { box-shadow: inset 0 0 0 2px #f59e0b !important; background: #fffbeb !important; }
+thead.sticky-head th { position: sticky; top: 0; z-index: 2; background: #0f172a; color: #e2e8f0; font-size: 11px; letter-spacing: .05em; padding: .6rem .5rem; border: 1px solid #1e293b; }
+pre.schema { background: #0f172a; color: #a7f3d0; border-radius: .75rem; padding: .9rem; font-size: 11px; overflow-x: auto; }
