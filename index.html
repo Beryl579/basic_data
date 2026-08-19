@@ -113,13 +113,20 @@
               <button onclick="resetLab()" class="w-full bg-white border-2 border-slate-200 hover:border-rose-300 hover:text-rose-500 text-slate-500 font-bold py-2.5 rounded-xl transition text-sm">♻️ Reset (Kosongkan)</button>
             </div>
 
-            <!-- Export / Import CSV -->
+            <!-- Export / Import CSV & JSON LENGKAP -->
             <div id="panelExport" class="bg-white rounded-2xl p-3 sm:p-4 shadow-sm border border-slate-200 space-y-2">
-              <div class="text-xs font-bold tracking-widest text-slate-400 mb-1">EXPORT / IMPORT</div>
-              <button onclick="exportCSV()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2.5 rounded-xl transition text-sm">📥 Export ke CSV</button>
+              <div class="text-xs font-bold tracking-widest text-slate-400 mb-1">EXPORT / IMPORT DATA</div>
+              <div class="grid grid-cols-2 gap-2">
+                <button onclick="exportCSV()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2.5 rounded-xl transition text-sm">📥 CSV</button>
+                <button onclick="exportJSON()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 rounded-xl transition text-sm">📥 JSON</button>
+              </div>
               <label class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2.5 rounded-xl transition text-sm text-center cursor-pointer block">
                 📤 Import CSV
                 <input type="file" id="csvFileInput" accept=".csv" onchange="importCSV(this)" class="hidden">
+              </label>
+              <label class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2.5 rounded-xl transition text-sm text-center cursor-pointer block">
+                📤 Import JSON
+                <input type="file" id="jsonFileInput" accept=".json" onchange="importJSON(this)" class="hidden">
               </label>
             </div>
 
@@ -153,16 +160,22 @@
               <div class="text-[10px] text-slate-400 text-center">Max 20 langkah</div>
             </div>
 
-            <!-- Statistik agregat (SUM / AVERAGE dll) -->
+            <!-- Statistik agregat LENGKAP (SUM / AVERAGE / MEDIAN / STDDEV dll) -->
             <div id="panelStats" class="bg-white rounded-2xl p-3 sm:p-4 shadow-sm border border-slate-200">
-              <div class="text-xs font-bold tracking-widest text-slate-400 mb-3">📐 STATISTIK OTOMATIS</div>
-              <div class="grid grid-cols-2 gap-2 text-center">
-                <div class="bg-emerald-50 rounded-xl p-2 sm:p-3"><div class="text-[10px] font-bold text-emerald-600">=SUM(Total)</div><div id="statSum" class="font-extrabold text-emerald-700 text-xs sm:text-sm mt-1">0</div></div>
-                <div class="bg-teal-50 rounded-xl p-2 sm:p-3"><div class="text-[10px] font-bold text-teal-600">=AVERAGE(Total)</div><div id="statAvg" class="font-extrabold text-teal-700 text-xs sm:text-sm mt-1">0</div></div>
-                <div class="bg-amber-50 rounded-xl p-2 sm:p-3"><div class="text-[10px] font-bold text-amber-600">=MAX(Total)</div><div id="statMax" class="font-extrabold text-amber-700 text-xs sm:text-sm mt-1">0</div></div>
-                <div class="bg-indigo-50 rounded-xl p-2 sm:p-3"><div class="text-[10px] font-bold text-indigo-600">=MIN(Total)</div><div id="statMin" class="font-extrabold text-indigo-700 text-xs sm:text-sm mt-1">0</div></div>
-                <div class="bg-slate-50 rounded-xl p-2 sm:p-3"><div class="text-[10px] font-bold text-slate-500">=COUNT(Baris)</div><div id="statCount" class="font-extrabold text-slate-700 text-xs sm:text-sm mt-1">0</div></div>
-                <div class="bg-rose-50 rounded-xl p-2 sm:p-3"><div class="text-[10px] font-bold text-rose-500">=SUM(Jumlah)</div><div id="statQty" class="font-extrabold text-rose-600 text-xs sm:text-sm mt-1">0</div></div>
+              <div class="text-xs font-bold tracking-widest text-slate-400 mb-3 flex justify-between items-center">
+                <span>📐 STATISTIK OTOMATIS LENGKAP</span>
+                <button onclick="showValidationReport()" class="text-[9px] bg-indigo-100 hover:bg-indigo-200 text-indigo-700 px-2 py-1 rounded-md font-bold transition">🔍 Validasi Data</button>
+              </div>
+              <div class="grid grid-cols-3 gap-2 text-center">
+                <div class="bg-emerald-50 rounded-xl p-2 sm:p-3"><div class="text-[9px] font-bold text-emerald-600">=SUM(Total)</div><div id="statSum" class="font-extrabold text-emerald-700 text-xs sm:text-sm mt-1">0</div></div>
+                <div class="bg-teal-50 rounded-xl p-2 sm:p-3"><div class="text-[9px] font-bold text-teal-600">=AVERAGE</div><div id="statAvg" class="font-extrabold text-teal-700 text-xs sm:text-sm mt-1">0</div></div>
+                <div class="bg-cyan-50 rounded-xl p-2 sm:p-3"><div class="text-[9px] font-bold text-cyan-600">=MEDIAN</div><div id="statMedian" class="font-extrabold text-cyan-700 text-xs sm:text-sm mt-1">0</div></div>
+                <div class="bg-amber-50 rounded-xl p-2 sm:p-3"><div class="text-[9px] font-bold text-amber-600">=MAX</div><div id="statMax" class="font-extrabold text-amber-700 text-xs sm:text-sm mt-1">0</div></div>
+                <div class="bg-indigo-50 rounded-xl p-2 sm:p-3"><div class="text-[9px] font-bold text-indigo-600">=MIN</div><div id="statMin" class="font-extrabold text-indigo-700 text-xs sm:text-sm mt-1">0</div></div>
+                <div class="bg-violet-50 rounded-xl p-2 sm:p-3"><div class="text-[9px] font-bold text-violet-600">=STDDEV</div><div id="statStddev" class="font-extrabold text-violet-700 text-xs sm:text-sm mt-1">0</div></div>
+                <div class="bg-slate-50 rounded-xl p-2 sm:p-3"><div class="text-[9px] font-bold text-slate-500">=COUNT</div><div id="statCount" class="font-extrabold text-slate-700 text-xs sm:text-sm mt-1">0</div></div>
+                <div class="bg-rose-50 rounded-xl p-2 sm:p-3"><div class="text-[9px] font-bold text-rose-500">=SUM(Qty)</div><div id="statQty" class="font-extrabold text-rose-600 text-xs sm:text-sm mt-1">0</div></div>
+                <div class="bg-orange-50 rounded-xl p-2 sm:p-3"><div class="text-[9px] font-bold text-orange-600">=Rumus</div><div class="font-extrabold text-orange-700 text-xs sm:text-sm mt-1">C×D</div></div>
               </div>
             </div>
 
@@ -231,7 +244,7 @@
             <div id="statusBar" class="bg-slate-900 text-emerald-300 rounded-xl px-4 py-2.5 text-xs font-mono overflow-x-auto whitespace-nowrap shadow"></div>
           </div>
 
-          <!-- ===== KANAN: VISUALISASI REAL-TIME ===== -->
+          <!-- ===== KANAN: VISUALISASI REAL-TIME LENGKAP (Bar, Donut, Line) ===== -->
           <div class="lg:col-span-12 xl:col-span-3 space-y-4">
             <div class="bg-white rounded-2xl p-3 sm:p-4 shadow-sm border border-slate-200">
               <div class="text-xs font-bold tracking-widest text-slate-400 mb-2">📊 TOTAL PER KATEGORI</div>
@@ -241,8 +254,12 @@
               <div class="text-xs font-bold tracking-widest text-slate-400 mb-2">🍩 JUMLAH PER KATEGORI</div>
               <div class="h-44 sm:h-52"><canvas id="chartDonut"></canvas></div>
             </div>
+            <div class="bg-white rounded-2xl p-3 sm:p-4 shadow-sm border border-slate-200">
+              <div class="text-xs font-bold tracking-widest text-slate-400 mb-2">📈 TREN KUMULATIF</div>
+              <div class="h-40 sm:h-48"><canvas id="chartLine"></canvas></div>
+            </div>
             <div class="bg-amber-50 border-2 border-amber-200 rounded-2xl p-3 sm:p-4 text-xs text-amber-900 leading-relaxed">
-              <strong>💡 Ide latihan:</strong> ubah angka di kolom Harga/Jumlah dan perhatikan Total, statistik, serta kedua grafik berubah seketika — inilah esensi <em>data → informasi → insight</em> dari Modul 1 & 4!
+              <strong>💡 Ide latihan:</strong> ubah angka di kolom Harga/Jumlah dan perhatikan Total, statistik, serta ketiga grafik berubah seketika — inilah esensi <em>data → informasi → insight</em> dari Modul 1 & 4!
             </div>
           </div>
         </div>
