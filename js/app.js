@@ -4,7 +4,7 @@
 ===================================================================== */
 
 const MODULES = [
-{ id:1, icon:"🧱", title:"Understanding Data", duration:"±10 menit", youtubeId:"RI7eIzq92aA",
+{ id:1, icon:"🧱", title:"Understanding Data", duration:"±10 menit", youtubeId:"7VqY_8uRjzg",
   desc:"Memahami hakikat data, jenis-jenis data, dan mengapa data menjadi fondasi segala keputusan.",
   sections:[
     { h:"1. Apa Itu Data?", body:`<p>Data adalah <strong>fakta mentah</strong> yang belum diolah dan belum memiliki makna tersendiri. Angka <strong>250.000</strong> saja hanyalah data. Tetapi ketika diberi konteks — <em>"penjualan bulan ini Rp250.000"</em> — ia berubah menjadi <strong>informasi</strong>.</p><p>Dalam piramida <strong>DIKW</strong>: <strong>Data → Informasi → Pengetahuan → Wisdom</strong>. Semakin naik, nilainya semakin besar bagi pengambilan keputusan.</p><div class="callout callout-example"><strong>💡 Contoh data di sekitarmu:</strong> suhu harian, jumlah pengunjung toko, struk transaksi, hasil survei, log klik website.</div>` },
@@ -19,7 +19,7 @@ const MODULES = [
     { q:"Jumlah produk terjual setiap bulan termasuk data…", o:["Kuantitatif diskrit","Kuantitatif kontinu","Kualitatif nominal","Kualitatif ordinal"], a:0, e:"Hasil menghitung (bilangan bulat) → kuantitatif diskrit." },
     { q:"Kamu menyebar kuesioner langsung ke pelanggan. Data yang kamu kumpulkan disebut…", o:["Data sekunder","Data eksternal","Data primer","Data historis"], a:2, e:"Dikumpulkan langsung dari sumber pertama = data primer." }
   ]},
-{ id:2, icon:"🏢", title:"Understanding Business Process", duration:"±10 menit", youtubeId:"uYAPp-rNH3E",
+{ id:2, icon:"🏢", title:"Understanding Business Process", duration:"±10 menit", youtubeId:"dQw4w9WgXcQ",
   desc:"Mengapa orang data wajib paham proses bisnis, dan bagaimana data lahir dari aktivitas bisnis.",
   sections:[
     { h:"1. Apa Itu Business Process?", body:`<p>Rangkaian aktivitas yang saling terkait untuk menghasilkan output bernilai bagi pelanggan.</p><div class="callout callout-example"><strong>💡 Contoh 'order-to-cash':</strong> pelanggan memesan → pembayaran → dikirim → uang diterima.</div><p>Setiap proses punya unsur: <strong>input → aktivitas → output</strong>, plus owner dan KPI.</p>` },
@@ -34,7 +34,7 @@ const MODULES = [
     { q:"Manfaat utama analis memahami proses bisnis adalah…", o:["Interpretasi data tepat dan rekomendasi relevan","Bisa melewati tahap pembersihan data","Tidak perlu bicara dengan stakeholder","Otomatis menguasai semua tools"], a:0, e:"Konteks bisnis membuat analisis menjawab masalah nyata." },
     { q:"Langkah pertama membaca sebuah proses bisnis adalah…", o:["Langsung membuat dashboard","Menggambar alur proses dari ujung ke ujung","Memilih warna grafik","Mengumpulkan semua data perusahaan"], a:1, e:"Petakan alurnya dulu, baru owner, KPI, pain point, dan data." }
   ]},
-{ id:3, icon:"📖", title:"Data Story", duration:"±8 menit", youtubeId:"rgS5uT_c2U4",
+{ id:3, icon:"📖", title:"Data Story", duration:"±8 menit", youtubeId:"bqvXzKKfLhU",
   desc:"Seni merangkai data menjadi cerita yang menggerakkan audiens untuk bertindak.",
   sections:[
     { h:"1. Apa Itu Data Story?", body:`<p>Narasi yang memadukan <strong>data, konteks, dan visual</strong> untuk menyampaikan pesan yang menggerakkan tindakan. Manusia mengingat cerita lebih baik daripada tabel.</p>` },
@@ -49,7 +49,7 @@ const MODULES = [
     { q:"Urutan struktur data story yang benar adalah…", o:["Rekomendasi – insight – konteks – konflik","Konteks – konflik – insight – rekomendasi","Insight – konteks – rekomendasi – konflik","Konflik – rekomendasi – konteks – insight"], a:1, e:"Konteks → konflik → insight → rekomendasi." },
     { q:"Berapa jumlah pesan utama yang ideal dalam satu data story?", o:["Sebanyak mungkin","Satu","Tiga","Sesuai jumlah grafik"], a:1, e:"Satu pesan utama agar audiens ingat dan tergerak." }
   ]},
-{ id:4, icon:"💡", title:"Data to Insight", duration:"±9 menit", youtubeId:"dqqe9BT3DFk",
+{ id:4, icon:"💡", title:"Data to Insight", duration:"±9 menit", youtubeId:"xJVLzkfNHrE",
   desc:"Naik tangga dari data mentah menuju insight yang actionable dan bernilai bisnis.",
   sections:[
     { h:"1. Tangga Data → Insight", body:`<ul class="list-disc pl-5 space-y-2"><li><strong>Data:</strong> '1.204'</li><li><strong>Informasi:</strong> '1.204 transaksi minggu ini'</li><li><strong>Pengetahuan:</strong> 'Turun 15%, terutama kategori A'</li><li><strong>Insight:</strong> 'Karena stok kosong — perbaiki replenishment'</li></ul>` },
@@ -64,7 +64,7 @@ const MODULES = [
     { q:"Yang BUKAN ciri insight yang baik adalah…", o:["Spesifik","Actionable","Umum dan ambigu","Relevan dengan tujuan"], a:2, e:"Insight umum tidak bisa ditindaklanjuti." },
     { q:"Teknik bertanya 'mengapa' berulang disebut…", o:["5 Whys","A/B Testing","Brainstorming","Benchmarking"], a:0, e:"5 Whys menembus gejala sampai akar penyebab." }
   ]},
-{ id:5, icon:"⚖️", title:"Data Story vs Dashboard", duration:"±8 menit", youtubeId:"H79S8YDuYUU",
+{ id:5, icon:"⚖️", title:"Data Story vs Dashboard", duration:"±8 menit", youtubeId:"Lq5PYVxPLaU",
   desc:"Kapan memakai dashboard, kapan data story — dan bagaimana keduanya saling melengkapi.",
   sections:[
     { h:"1. Dashboard: Alat Monitoring", body:`<p>Panel metrik interaktif untuk memantau kinerja. Kelebihan: banyak indikator, eksplorasi bebas. Kekurangan: tidak memberi kesimpulan.</p>` },
@@ -78,7 +78,7 @@ const MODULES = [
     { q:"Hubungan dashboard dan data story yang benar adalah…", o:["Bersaing, tidak bisa dipakai bersamaan","Melengkapi: anomali di dashboard didalami jadi data story","Dashboard hanya untuk direktur","Data story menggantikan kebutuhan data"], a:1, e:"Peran berbeda, saling melengkapi." },
     { q:"Karakteristik utama data story dibanding dashboard adalah…", o:["Interaktif dan real-time","Narasi linier terfokus pada satu pesan","Menampilkan semua metrik","Tidak memakai visual"], a:1, e:"Data story linier dan terkurasi." }
   ]},
-{ id:6, icon:"🎯", title:"Data-Driven Decision", duration:"±9 menit", youtubeId:"sMxPlbJT_Hw",
+{ id:6, icon:"🎯", title:"Data-Driven Decision", duration:"±9 menit", youtubeId:"Z1NLAKfN7hI",
   desc:"Mengambil keputusan berbasis data, bukan intuisi — plus jebakan yang harus dihindari.",
   sections:[
     { h:"1. Apa Itu DDD?", body:`<p>Keputusan dari <strong>analisis data</strong>, bukan intuisi atau HiPPO (<em>highest paid person's opinion</em>).</p>` },
@@ -93,7 +93,7 @@ const MODULES = [
     { q:"Confirmation bias adalah…", o:["Mencari hanya data yang mendukung pendapat sendiri","Memvalidasi semua data dua kali","Menggunakan terlalu banyak data","Tidak percaya pada data"], a:0, e:"Bias yang membuat kita 'menemukan' apa yang ingin kita temukan." },
     { q:"Urutan proses pengambilan keputusan yang benar adalah…", o:["Analisis – putuskan – definisi – kumpulkan data","Definisi masalah – kumpulkan data – analisis – putuskan – ukur hasil","Kumpulkan data – definisi – putuskan – analisis","Putuskan – kumpulkan data – analisis – definisi"], a:1, e:"Mulai dari masalah, akhiri dengan pengukuran." }
   ]},
-{ id:7, icon:"💰", title:"Business Value from Data", duration:"±8 menit", youtubeId:"MkjlIzvfqdo",
+{ id:7, icon:"💰", title:"Business Value from Data", duration:"±8 menit", youtubeId:"RnHm1tF7zLU",
   desc:"Bagaimana data menciptakan nilai: efisiensi, pendapatan, pengalaman, dan mitigasi risiko.",
   sections:[
     { h:"1. Empat Cara Data Menciptakan Nilai", body:`<ul class="list-disc pl-5 space-y-2"><li>Efisiensi operasional</li><li>Pengalaman pelanggan</li><li>Pendapatan baru</li><li>Mitigasi risiko</li></ul>` },
@@ -107,7 +107,7 @@ const MODULES = [
     { q:"Untuk membuktikan nilai inisiatif data, kita harus…", o:["Mengaitkannya dengan metrik bisnis seperti revenue/cost/risk/speed","Membuat grafik paling rumit","Memakai tools paling mahal","Presentasi sepanjang mungkin"], a:0, e:"Nilai harus terukur dalam bahasa bisnis." },
     { q:"Rumus ROI sederhana adalah…", o:["(Manfaat − Biaya) ÷ Biaya","Manfaat + Biaya","Biaya ÷ Manfaat","Manfaat × Biaya"], a:0, e:"ROI mengukur keuntungan relatif terhadap biaya." }
   ]},
-{ id:8, icon:"🗄️", title:"Business Data & Information Management", duration:"±10 menit", youtubeId:"tCfK6eQx3vY",
+{ id:8, icon:"🗄️", title:"Business Data & Information Management", duration:"±10 menit", youtubeId:"vMu4bwHWqxA",
   desc:"Kualitas data, tata kelola (governance), dan tempat penyimpanan data secara ringkas.",
   sections:[
     { h:"1. Mengapa Dikelola?", body:`<p>Garbage in, garbage out. Manajemen data membuat data mudah ditemukan, akurat, aman, siap pakai.</p>` },
@@ -269,7 +269,7 @@ function openModule(id){
         <span class="bg-slate-100 px-3 py-1.5 rounded-full">📝 ${m.quiz.length} soal</span>
         <span class="bg-slate-100 px-3 py-1.5 rounded-full">🎯 KKM ${PASS_SCORE}%</span>
       </div>
-      ${m.youtubeId ? `<div class="mt-6"><div class="aspect-video w-full rounded-2xl overflow-hidden shadow-lg border border-slate-200"><iframe class="w-full h-full" src="https://www.youtube.com/embed/${m.youtubeId}" title="Video ${m.title}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div></div>` : ''}
+      ${m.youtubeId ? `<div class="mt-6"><div class="aspect-video w-full rounded-2xl overflow-hidden shadow-lg border border-slate-200"><iframe class="w-full h-full" src="https://www.youtube-nocookie.com/embed/${m.youtubeId}" title="Video ${m.title}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen loading="lazy"></iframe></div><div class="mt-3 text-center"><a href="https://youtu.be/${m.youtubeId}" target="_blank" rel="noopener noreferrer" class="text-xs font-semibold text-emerald-600 hover:text-emerald-700 underline">📺 Tonton di YouTube (tab baru)</a></div></div>` : ''}
     </div>
     ${m.sections.map(s=>`<section class="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-slate-200"><h2 class="text-lg sm:text-xl font-extrabold mb-3">${s.h}</h2><div class="text-slate-600 leading-relaxed space-y-3">${s.body}</div></section>`).join("")}
     <section class="bg-amber-50 rounded-3xl p-6 sm:p-8 border-2 border-amber-200"><h2 class="text-lg font-extrabold text-amber-800 mb-3">🔑 Poin Penting</h2><ul class="space-y-2">${m.points.map(pt=>`<li class="flex gap-2 text-amber-900"><span>✔</span><span>${pt}</span></li>`).join("")}</ul></section>
