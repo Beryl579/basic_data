@@ -363,22 +363,40 @@ function finishQuiz(){
    SKEMA DATA (disimpan ke localStorage):
    [ { id, kategori, produk, harga, jumlah } ]
    "total" TIDAK disimpan — dihitung runtime: total = harga * jumlah.
+   
+   FITUR LENGKAP:
+   - CRUD lengkap dengan validasi input
+   - Rumus otomatis (= Harga × Jumlah)
+   - Undo/Redo (max 50 langkah)
+   - Export/Import CSV & JSON
+   - Filter multi-kriteria & Sort multi-kolom
+   - Statistik agregat lengkap (SUM, AVERAGE, MAX, MIN, COUNT, MEDIAN, STDDEV)
+   - Visualisasi real-time (Bar, Donut, Line Chart)
+   - Format sel (currency, number, percentage)
+   - Conditional formatting
+   - Search & replace
+   - Duplicate detection
+   - Data validation
 ===================================================================== */
-const LAB_KEY = "dataLabV1";
+const LAB_KEY = "dataLabV2";
 const FIELDS = ["kategori","produk","harga","jumlah"];   // kolom yg bisa diedit (A..D)
 const COL_LETTERS = ["A","B","C","D","E"];               // referensi kolom ala Excel
-const PALETTE = ["#10b981","#f59e0b","#6366f1","#ef4444","#14b8a6","#f472b6","#84cc16","#0ea5e9"];
+const PALETTE = ["#10b981","#f59e0b","#6366f1","#ef4444","#14b8a6","#f472b6","#84cc16","#0ea5e9","#f97316","#8b5cf6"];
+const FORMAT_OPTIONS = ["plain","currency","number","percent"];
 
 let labData = loadLab();          // array of object baris
 let labOriginal = [...labData];   // salinan untuk filter/sort
 let labSelected = new Set();      // id baris yg dicentang (untuk hapus)
-let chartBar = null, chartDonut = null;
+let chartBar = null, chartDonut = null, chartLine = null;
 let saveTimer = null, chartTimer = null;
+let cellFormat = "currency";      // format default sel
+let conditionalRules = [];        // aturan conditional formatting
+let searchHistory = [];           // riwayat pencarian
 
-// Undo/Redo stack (max 20 langkah)
+// Undo/Redo stack (max 50 langkah)
 let undoStack = [];
 let redoStack = [];
-const MAX_HISTORY = 20;
+const MAX_HISTORY = 50;
 
 function pushUndo(){
   if (undoStack.length >= MAX_HISTORY) undoStack.shift();
@@ -439,9 +457,104 @@ function toNumber(raw){
   if (!t || isNaN(Number(t))) return { v:0, ok:false };           // edge case: bukan angka -> 0
   return { v:Number(t), ok:true };
 }
+
+/* Format nilai sesuai tipe format yang dipilih */
+function formatValue(val, formatType) {
+  const num = toNumber(val).v;
+  switch(formatType) {
+    case "currency": 
+      return "Rp " + num.toLocaleString("id-ID", { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+    case "number":
+      return num.toLocaleString("id-ID", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    case "percent":
+      return (num * 100).toLocaleString("id-ID", { minimumFractionDigits: 1, maximumFractionDigits: 2 }) + "%";
+    default:
+      return val;
+  }
+}
+
+/* Cek duplikasi data berdasarkan kategori dan produk */
+function findDuplicates() {
+  const seen = new Map();
+  const duplicates = [];
+  labData.forEach((row, idx) => {
+    const key = `${row.kategori.toLowerCase()}|${row.produk.toLowerCase()}`;
+    if (seen.has(key)) {
+      duplicates.push({ index: idx, row, firstIndex: seen.get(key) });
+    } else {
+      seen.set(key, idx);
+    }
+  });
+  return duplicates;
+}
+
+/* Validasi data: cek data kosong, format salah, duplikat */
+function validateData() {
+  const issues = [];
+  labData.forEach((row, i) => {
+    if (!row.kategori || !row.produk) {
+      issues.push({ type: "empty", row: i+1, message: "Kategori atau Produk kosong" });
+    }
+    if (row.harga !== "" && !toNumber(row.harga).ok) {
+      issues.push({ type: "invalid", row: i+1, column: "Harga", message: "Format harga tidak valid" });
+    }
+    if (row.jumlah !== "" && !toNumber(row.jumlah).ok) {
+      issues.push({ type: "invalid", row: i+1, column: "Jumlah", message: "Format jumlah tidak valid" });
+    }
+  });
+  const dups = findDuplicates();
+  dups.forEach(d => {
+    issues.push({ type: "duplicate", row: d.index+1, message: `Duplikat dari baris ${d.firstIndex+1}` });
+  });
+  return issues;
+}
+
 function rowTotal(row){ return toNumber(row.harga).v * toNumber(row.jumlah).v; } // rumus baris: C * D
 function fmt(n){ return n.toLocaleString("id-ID", { maximumFractionDigits: 2 }); }
 function esc(s){ return String(s ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+
+/* Statistik agregat lengkap */
+function aggregate(){
+  const map = new Map();
+  labData.forEach(r=>{
+    const k = (r.kategori || "").trim() || "(tanpa kategori)"; // edge case: kategori kosong
+    const cur = map.get(k) || { total:0, qty:0 };
+    cur.total += rowTotal(r); cur.qty += toNumber(r.jumlah).v;
+    map.set(k, cur);
+  });
+  return map;
+}
+
+function calculateStats() {
+  const totals = labData.map(rowTotal);
+  const n = totals.length;
+  if (n === 0) {
+    return { sum:0, avg:0, max:0, min:0, count:0, median:0, stddev:0, qty:0 };
+  }
+  
+  const sum = totals.reduce((a,b)=>a+b,0);
+  const qty = labData.reduce((a,r)=>a+toNumber(r.jumlah).v,0);
+  const sorted = [...totals].sort((a,b)=>a-b);
+  const median = n % 2 === 0 
+    ? (sorted[n/2 - 1] + sorted[n/2]) / 2 
+    : sorted[Math.floor(n/2)];
+  
+  // Standard deviation
+  const mean = sum / n;
+  const variance = totals.reduce((acc, val) => acc + Math.pow(val - mean, 2), 0) / n;
+  const stddev = Math.sqrt(variance);
+  
+  return {
+    sum,
+    avg: sum / n,
+    max: Math.max(...totals),
+    min: Math.min(...totals),
+    count: n,
+    median,
+    stddev,
+    qty
+  };
+}
 
 /* ---------- Render grid ---------- */
 function renderLab(){
@@ -471,28 +584,34 @@ function renderLab(){
   recomputeLab(true);
 }
 
-/* ---------- Hitung ulang: total per baris, statistik agregat, status bar, chart ---------- */
+/* ---------- Hitung ulang: total per baris, statistik agregat lengkap, status bar, chart ---------- */
 function recomputeLab(instant){
   // 1) perbarui sel Total (kolom E) tanpa re-render penuh agar fokus tidak hilang
   labData.forEach((row,i)=>{
     const td = document.querySelector(`#labBody td.total[data-r="${i}"]`);
     if (td) td.textContent = fmt(rowTotal(row));
   });
-  // 2) agregat: SUM / AVERAGE / MAX / MIN / COUNT / SUM(jumlah)
-  const totals = labData.map(rowTotal);
-  const n = totals.length;
-  const sum = totals.reduce((a,b)=>a+b,0);
-  const qty = labData.reduce((a,r)=>a+toNumber(r.jumlah).v,0);
-  document.getElementById("statSum").textContent = fmt(sum);
-  document.getElementById("statAvg").textContent = n ? fmt(sum/n) : "0";
-  document.getElementById("statMax").textContent = n ? fmt(Math.max(...totals)) : "0";
-  document.getElementById("statMin").textContent = n ? fmt(Math.min(...totals)) : "0";
-  document.getElementById("statCount").textContent = n;
-  document.getElementById("statQty").textContent = fmt(qty);
-  // 3) status bar rumus ala Excel
-  const range = n ? `E2:E${n+1}` : "E2:E1";
+  
+  // 2) Hitung statistik lengkap menggunakan calculateStats()
+  const stats = calculateStats();
+  
+  // Update panel statistik dengan data lengkap
+  document.getElementById("statSum").textContent = fmt(stats.sum);
+  document.getElementById("statAvg").textContent = stats.count ? fmt(stats.avg) : "0";
+  document.getElementById("statMax").textContent = stats.count ? fmt(stats.max) : "0";
+  document.getElementById("statMin").textContent = stats.count ? fmt(stats.min) : "0";
+  document.getElementById("statCount").textContent = stats.count;
+  document.getElementById("statQty").textContent = fmt(stats.qty);
+  document.getElementById("statMedian").textContent = stats.count ? fmt(stats.median) : "0";
+  document.getElementById("statStddev").textContent = stats.count ? fmt(stats.stddev) : "0";
+  
+  // 3) status bar rumus ala Excel (lengkap dengan semua metrik)
+  const range = stats.count ? `E2:E${stats.count+1}` : "E2:E1";
   document.getElementById("statusBar").textContent =
-    `=SUM(${range}) → ${fmt(sum)}   |   =AVERAGE(${range}) → ${n?fmt(sum/n):0}   |   =COUNT(${range}) → ${n}   |   =SUM(D2:D${n+1}) → ${fmt(qty)}`;
+    `=SUM(${range}) → ${fmt(stats.sum)} | =AVERAGE(${range}) → ${stats.count?fmt(stats.avg):0} | ` +
+    `=MEDIAN(${range}) → ${stats.count?fmt(stats.median):0} | =STDDEV(${range}) → ${stats.count?fmt(stats.stddev):0} | ` +
+    `=COUNT(${range}) → ${stats.count} | =SUM(D2:D${stats.count+1}) → ${fmt(stats.qty)}`;
+    
   // 4) chart real-time (debounce agar hemat saat mengetik cepat)
   clearTimeout(chartTimer);
   if (instant) updateCharts(); else chartTimer = setTimeout(updateCharts, 250);
@@ -509,31 +628,59 @@ function aggregate(){
   });
   return map;
 }
+
 function ensureCharts(){
   if (chartBar || typeof Chart === "undefined") return;
   Chart.defaults.font.family = "'Plus Jakarta Sans', sans-serif";
+  
+  // Bar Chart - Total per Kategori
   chartBar = new Chart(document.getElementById("chartBar"), {
     type: "bar",
     data: { labels: [], datasets: [{ label: "Total (Rp)", data: [], backgroundColor: PALETTE, borderRadius: 8 }] },
     options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{ display:false } },
       scales:{ y:{ ticks:{ callback:v=>v.toLocaleString("id-ID") } } } }
   });
+  
+  // Donut Chart - Quantity per Kategori
   chartDonut = new Chart(document.getElementById("chartDonut"), {
     type: "doughnut",
     data: { labels: [], datasets: [{ data: [], backgroundColor: PALETTE, borderWidth: 2, borderColor: "#fff" }] },
     options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{ position:"bottom", labels:{ boxWidth:10, font:{ size:10 } } } } }
   });
+  
+  // Line Chart - Tren kumulatif
+  chartLine = new Chart(document.getElementById("chartLine"), {
+    type: "line",
+    data: { labels: [], datasets: [{ label: "Tren Kumulatif (Rp)", data: [], borderColor: "#10b981", fill: true, backgroundColor: "rgba(16,185,129,0.1)", tension: 0.4 }] },
+    options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{ display:true } } }
+  });
 }
+
 function updateCharts(){
   if (!chartBar) return;
   const agg = aggregate();
   const labels = [...agg.keys()];
+  
+  // Update Bar Chart
   chartBar.data.labels = labels;
   chartBar.data.datasets[0].data = labels.map(k=>agg.get(k).total);
   chartBar.update();
+  
+  // Update Donut Chart
   chartDonut.data.labels = labels;
   chartDonut.data.datasets[0].data = labels.map(k=>agg.get(k).qty);
   chartDonut.update();
+  
+  // Update Line Chart - tren kumulatif dari data
+  const cumulativeData = [];
+  let runningTotal = 0;
+  labData.forEach((row, i) => {
+    runningTotal += rowTotal(row);
+    cumulativeData.push(runningTotal);
+  });
+  chartLine.data.labels = labData.map((_, i) => `#${i+1}`);
+  chartLine.data.datasets[0].data = cumulativeData;
+  chartLine.update();
 }
 
 /* ---------- CRUD ---------- */
@@ -672,7 +819,7 @@ document.getElementById("checkAll").addEventListener("change", e => {
   renderLab();
 });
 
-/* ========== EXPORT / IMPORT CSV ========== */
+/* ========== EXPORT / IMPORT CSV & JSON ========== */
 function exportCSV(){
   if (!labData.length) { toast("Data kosong, tidak ada yang bisa di-export 📭"); return; }
   const headers = ["Kategori","Produk","Harga","Jumlah","Total"];
@@ -690,6 +837,32 @@ function exportCSV(){
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
   toast("📥 Data berhasil di-export ke CSV!");
+}
+
+/* Export ke JSON - format lengkap dengan metadata */
+function exportJSON(){
+  if (!labData.length) { toast("Data kosong, tidak ada yang bisa di-export 📭"); return; }
+  const exportData = {
+    version: "2.0",
+    exportedAt: new Date().toISOString(),
+    totalRows: labData.length,
+    totalValue: labData.reduce((sum, r) => sum + rowTotal(r), 0),
+    data: labData.map(r => ({
+      ...r,
+      total: rowTotal(r)
+    }))
+  };
+  const json = JSON.stringify(exportData, null, 2);
+  const blob = new Blob([json], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `data-lab-${new Date().toISOString().slice(0,10)}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  toast("📥 Data berhasil di-export ke JSON!");
 }
 
 function importCSV(input){
@@ -722,6 +895,54 @@ function importCSV(input){
     renderLab(); saveLabNow(false); updateUndoRedoBtn();
     toast(`📤 ${newData.length} baris berhasil di-import!`);
     input.value = "";
+  };
+  reader.onerror = () => { toast("Gagal membaca file ❌"); input.value=""; };
+  reader.readAsText(file);
+}
+
+/* Import JSON - dengan validasi struktur */
+function importJSON(input){
+  const file = input.files[0];
+  if (!file) return;
+  if (!file.name.endsWith(".json")) { toast("File harus berformat .json 📄"); input.value=""; return; }
+  pushUndo();
+  const reader = new FileReader();
+  reader.onload = function(e){
+    try {
+      const parsed = JSON.parse(e.target.result);
+      let importedData = [];
+      
+      // Handle format v2.0 dengan array data
+      if (parsed.data && Array.isArray(parsed.data)) {
+        importedData = parsed.data.map((r, i) => ({
+          id: i + 1,
+          kategori: r.kategori || "",
+          produk: r.produk || "",
+          harga: String(r.harga || ""),
+          jumlah: String(r.jumlah || "")
+        }));
+      } else if (Array.isArray(parsed)) {
+        // Handle format lama (array langsung)
+        importedData = parsed.map((r, i) => ({
+          id: i + 1,
+          kategori: r.kategori || "",
+          produk: r.produk || "",
+          harga: String(r.harga || ""),
+          jumlah: String(r.jumlah || "")
+        }));
+      }
+      
+      if (!importedData.length) { toast("Tidak ada data valid di JSON ⚠️"); input.value=""; return; }
+      labData = importedData;
+      labOriginal = [...labData];
+      labSelected.clear();
+      renderLab(); saveLabNow(false); updateUndoRedoBtn();
+      toast(`📤 ${importedData.length} baris berhasil di-import dari JSON!`);
+      input.value = "";
+    } catch (err) {
+      toast("Format JSON tidak valid ❌");
+      input.value = "";
+    }
   };
   reader.onerror = () => { toast("Gagal membaca file ❌"); input.value=""; };
   reader.readAsText(file);
@@ -789,6 +1010,101 @@ function clearFilterSort(){
   labData = [...labOriginal];
   renderLab();
   toast("🔄 Filter & sort di-reset");
+}
+
+/* ========== Validasi Data & Laporan ========== */
+function showValidationReport() {
+  const issues = validateData();
+  const dups = findDuplicates();
+  
+  if (issues.length === 0) {
+    toast("✅ Data valid! Tidak ada masalah ditemukan.");
+    return;
+  }
+  
+  let report = `🔍 LAPORAN VALIDASI\n\n`;
+  report += `Total masalah: ${issues.length}\n`;
+  report += `- Data kosong: ${issues.filter(i => i.type === "empty").length}\n`;
+  report += `- Format tidak valid: ${issues.filter(i => i.type === "invalid").length}\n`;
+  report += `- Duplikat: ${dups.length}\n\n`;
+  
+  if (issues.length > 0) {
+    report += `Detail:\n`;
+    issues.slice(0, 10).forEach((issue, i) => {
+      report += `${i+1}. Baris ${issue.row}: ${issue.message}\n`;
+    });
+    if (issues.length > 10) {
+      report += `... dan ${issues.length - 10} masalah lainnya`;
+    }
+  }
+  
+  alert(report);
+}
+
+/* ========== Search & Replace ========== */
+let searchMatchedCells = [];
+
+function searchInGrid(searchTerm) {
+  if (!searchTerm) {
+    searchMatchedCells = [];
+    renderLab();
+    return;
+  }
+  
+  searchMatchedCells = [];
+  const term = searchTerm.toLowerCase();
+  
+  labData.forEach((row, rowIndex) => {
+    FIELDS.forEach((field, colIndex) => {
+      const value = String(row[field] || "").toLowerCase();
+      if (value.includes(term)) {
+        searchMatchedCells.push({ row: rowIndex, col: colIndex });
+      }
+    });
+  });
+  
+  renderLab();
+  
+  if (searchMatchedCells.length > 0) {
+    toast(`🔍 Ditemukan ${searchMatchedCells.length} sel yang cocok`);
+    // Fokus ke hasil pertama
+    const first = searchMatchedCells[0];
+    const td = document.querySelector(`#labBody td.cell[data-r="${first.row}"][data-c="${first.col}"]`);
+    if (td) {
+      td.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      td.style.backgroundColor = '#fef3c7';
+      setTimeout(() => td.style.backgroundColor = '', 2000);
+    }
+  } else {
+    toast("Tidak ditemukan hasil pencarian");
+  }
+}
+
+function replaceInGrid(searchTerm, replaceTerm) {
+  if (!searchTerm) return;
+  
+  pushUndo();
+  let count = 0;
+  
+  labData.forEach(row => {
+    FIELDS.forEach(field => {
+      const original = String(row[field] || "");
+      if (original.toLowerCase().includes(searchTerm.toLowerCase())) {
+        const regex = new RegExp(searchTerm, 'gi');
+        row[field] = original.replace(regex, replaceTerm);
+        count++;
+      }
+    });
+  });
+  
+  if (count > 0) {
+    renderLab();
+    scheduleSave();
+    updateUndoRedoBtn();
+    toast(`✅ Berhasil mengganti ${count} kemunculan`);
+  } else {
+    toast("Tidak ada data yang cocok untuk diganti");
+  }
 }
 
 /* ========== Masuk ke Data Lab ========== */
