@@ -23,3 +23,35 @@ td.rowhead, th.colhead { background: #f1f5f9; color: #64748b; font-weight: 700; 
 .cell-invalid { box-shadow: inset 0 0 0 2px #f59e0b !important; background: #fffbeb !important; }
 thead.sticky-head th { position: sticky; top: 0; z-index: 2; background: #0f172a; color: #e2e8f0; font-size: 11px; letter-spacing: .05em; padding: .6rem .5rem; border: 1px solid #1e293b; }
 pre.schema { background: #0f172a; color: #a7f3d0; border-radius: .75rem; padding: .9rem; font-size: 11px; overflow-x: auto; }
+
+/* ====== MOBILE OPTIMIZATIONS ====== */
+@media (max-width: 1023px) {
+  /* Panel tabs horizontal scroll untuk mobile */
+  .lg:hidden .overflow-x-auto::-webkit-scrollbar { height: 4px; }
+  .lg:hidden .overflow-x-auto::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
+  .lg:hidden .overflow-x-auto::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+  
+  /* Grid lebih kecil di mobile */
+  td.cell { padding: 0.4rem 0.5rem; min-width: 70px; font-size: 13px; }
+  th.colhead { font-size: 10px; padding: 0.4rem 0.3rem; }
+  
+  /* Formula bar lebih compact */
+  #nbRef { width: 3rem !important; font-size: 12px; }
+  #nbFormula { font-size: 12px; padding: 0.5rem 0.75rem; }
+  
+  /* Status bar lebih kecil */
+  #statusBar { font-size: 11px; padding: 0.5rem 0.75rem; }
+  
+  /* Chart heights lebih kecil di mobile */
+  .h-48 { min-height: 12rem; }
+  .h-44 { min-height: 11rem; }
+}
+
+/* Prevent zoom on double tap */
+* { touch-action: manipulation; }
+
+/* Improve tap targets for mobile */
+button, input, select, label { min-height: 44px; }
+
+/* Sidebar smoother transition */
+#sidebar { will-change: transform; }
